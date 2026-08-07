@@ -1,0 +1,8 @@
+POST http://localhost:4004/odata/v4/leave/Holidays
+Content-Type: application/json
+
+{
+    "HolidayName":"Independence Day",
+    "holidayDate":"2026-08-15",
+    "description":"National Holiday"
+}

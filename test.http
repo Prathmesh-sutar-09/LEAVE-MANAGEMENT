@@ -1,0 +1,96 @@
+### Update Employee
+
+PATCH http://localhost:4004/odata/v4/leave/Employees(ID=714d63ff-52b1-4ff2-a62d-d6509c3a18f9)
+Content-Type: application/json
+
+{
+    "department": "IT"
+}
+
+###
+
+### Create Employee
+
+POST http://localhost:4004/odata/v4/leave/Employees
+Content-Type: application/json
+
+{
+    "employeeId": "EMP001",
+    "name": "Prathmesh",
+    "department_ID": "6c5d8b4f-7d83-4d2d-9e5f-123456789abc"
+}
+### Delete Employee
+DELETE http://localhost:4004/odata/v4/leave/Employees(5f2ab24d-87e5-4ab5-b609-18e209f79cba)
+
+
+###
+
+### $select
+GET http://localhost:4004/odata/v4/leave/Employees?$select=name
+
+###
+
+### $filter
+
+GET http://localhost:4004/odata/v4/leave/Employees?$filter=department eq 'CM'
+
+
+
+###
+
+### Greater Than
+
+GET http://localhost:4004/odata/v4/leave/Employees?$filter=leaveBalance gt 15
+
+
+
+###
+
+### Less Than
+
+GET http://localhost:4004/odata/v4/leave/Employees?$filter=leaveBalance lt 15
+
+
+
+###
+
+### Less Than or Equal
+
+GET http://localhost:4004/odata/v4/leave/Employees?$filter=leaveBalance le 15
+
+
+###
+
+### AND
+
+GET http://localhost:4004/odata/v4/leave/Employees?$filter=department eq 'IT' and leaveBalance gt 15
+
+
+###
+
+### OR 
+
+GET http://localhost:4004/odata/v4/leave/Employees?$filter=department eq 'HR' or department eq 'HR'
+
+
+
+###
+
+### $orderby
+
+GET http://localhost:4004/odata/v4/leave/Employees?$orderby=name desc
+
+
+###
+
+### $COUNT
+
+GET http://localhost:4004/odata/v4/leave/Employees/$count
+
+
+
+
+###
+
+
+GET /odata/v4/LeaveService/LeaveRequests

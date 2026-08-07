@@ -1,0 +1,630 @@
+############################################################
+### SAP CAP Leave Management System
+### PART 1 - MASTER DATA
+############################################################
+
+@server = http://localhost:4004/odata/v4/leave
+
+############################################################
+### DEPARTMENTS
+############################################################
+
+### Create HR Department
+POST {{server}}/Departments
+Content-Type: application/json
+
+{
+    "ID":"11111111-1111-1111-1111-111111111111",
+    "name":"HR"
+}
+
+###
+
+### Create IT Department
+POST {{server}}/Departments
+Content-Type: application/json
+
+{
+    "ID":"22222222-2222-2222-2222-222222222222",
+    "name":"IT"
+}
+
+###
+
+### Get Departments
+GET {{server}}/Departments
+
+############################################################
+### EMPLOYEES
+############################################################
+
+### Create Manager (Alice)
+POST {{server}}/Employees
+Content-Type: application/json
+
+{
+    "employeeId":"EMP001",
+    "name":"Alice",
+    "designation":"Manager",
+    "joiningDate":"2024-01-01",
+    "department_ID":"11111111-1111-1111-1111-111111111111"
+}
+
+###
+
+### Get Employees
+GET {{server}}/Employees
+
+############################################################
+### IMPORTANT
+############################################################
+
+### Copy Alice's ID from above GET request
+### Replace MANAGER_ID below
+
+###
+
+### Create Employee (Ramesh)
+POST {{server}}/Employees
+Content-Type: application/json
+
+{
+    "employeeId":"EMP002",
+    "name":"Ramesh",
+    "designation":"Software Engineer",
+    "joiningDate":"2025-01-01",
+    "department_ID":"22222222-2222-2222-2222-222222222222",
+    "manager_ID":"<MANAGER_ID>"
+}
+
+###
+
+### Get Employees
+GET {{server}}/Employees
+
+############################################################
+### LEAVE TYPES
+############################################################
+
+### Annual Leave
+
+POST {{server}}/LeaveTypes
+Content-Type: application/json
+
+{
+    "ID":"11111111-1111-1111-1111-111111111111",
+    "name":"Annual Leave",
+    "yearlyAllocation":20,
+    "description":"Annual Leave"
+}
+
+###
+
+### Sick Leave
+
+POST {{server}}/LeaveTypes
+Content-Type: application/json
+
+{
+    "ID":"22222222-2222-2222-2222-222222222222",
+    "name":"Sick Leave",
+    "yearlyAllocation":10,
+    "description":"Medical Leave"
+}
+
+###
+
+### Casual Leave
+
+POST {{server}}/LeaveTypes
+Content-Type: application/json
+
+{
+    "ID":"33333333-3333-3333-3333-333333333333",
+    "name":"Casual Leave",
+    "yearlyAllocation":12,
+    "description":"Casual Leave"
+}
+
+###
+
+GET {{server}}/LeaveTypes
+
+############################################################
+### HOLIDAYS
+############################################################
+
+### Create Holiday
+
+POST {{server}}/Holidays
+Content-Type: application/json
+
+{
+    "HolidayName":"Independence Day",
+    "holidayDate":"2026-08-15",
+    "description":"National Holiday",
+    "isOptional":false
+}
+
+###
+
+GET {{server}}/Holidays
+
+############################################################
+### Activate Holiday
+############################################################
+
+POST {{server}}/activateHoliday
+Content-Type: application/json
+
+{
+    "ID":"<HOLIDAY_ID>"
+}
+
+###
+
+############################################################
+### Deactivate Holiday
+############################################################
+
+POST {{server}}/deactivateHoliday
+Content-Type: application/json
+
+{
+    "ID":"<HOLIDAY_ID>"
+}
+
+###
+
+GET {{server}}/Holidays
+
+############################################################
+### LEAVE BALANCES
+############################################################
+
+GET {{server}}/LeaveBalances
+
+
+############################################################
+### SAP CAP Leave Management System
+### PART 2 - LEAVE WORKFLOW
+############################################################
+
+@server = http://localhost:4004/odata/v4/leave
+
+############################################################
+### IMPORTANT
+############################################################
+
+### Copy Employee ID (Ramesh)
+### Copy Leave Type ID (Annual Leave)
+
+############################################################
+### APPLY LEAVE
+############################################################
+
+POST {{server}}/LeaveRequests
+Content-Type: application/json
+
+{
+    "employee_ID":"<EMPLOYEE_ID>",
+    "leaveType_ID":"11111111-1111-1111-1111-111111111111",
+    "fromDate":"2026-09-14",
+    "toDate":"2026-09-16",
+    "reason":"Family Function"
+}
+
+###
+
+GET {{server}}/LeaveRequests
+
+############################################################
+### MANAGER APPROVE
+############################################################
+
+### Copy Leave Request ID
+
+POST {{server}}/managerApprove
+Content-Type: application/json
+
+{
+    "ID":"<LEAVE_REQUEST_ID>"
+}
+
+###
+
+GET {{server}}/LeaveRequests
+
+############################################################
+### HR APPROVE
+############################################################
+
+POST {{server}}/hrApprove
+Content-Type: application/json
+
+{
+    "ID":"<LEAVE_REQUEST_ID>"
+}
+
+###
+
+GET {{server}}/LeaveRequests
+
+############################################################
+### MANAGER REJECT
+############################################################
+
+### Create another Leave Request before testing
+
+POST {{server}}/LeaveRequests
+Content-Type: application/json
+
+{
+    "employee_ID":"<EMPLOYEE_ID>",
+    "leaveType_ID":"11111111-1111-1111-1111-111111111111",
+    "fromDate":"2026-10-10",
+    "toDate":"2026-10-12",
+    "reason":"Personal Work"
+}
+
+###
+
+POST {{server}}/managerReject
+Content-Type: application/json
+
+{
+    "ID":"<LEAVE_REQUEST_ID>"
+}
+
+###
+
+GET {{server}}/LeaveRequests
+
+############################################################
+### HR REJECT
+############################################################
+
+### Create another Leave Request
+
+POST {{server}}/LeaveRequests
+Content-Type: application/json
+
+{
+    "employee_ID":"<EMPLOYEE_ID>",
+    "leaveType_ID":"11111111-1111-1111-1111-111111111111",
+    "fromDate":"2026-11-15",
+    "toDate":"2026-11-17",
+    "reason":"Medical"
+}
+
+###
+
+### Manager Approve
+
+POST {{server}}/managerApprove
+Content-Type: application/json
+
+{
+    "ID":"<LEAVE_REQUEST_ID>"
+}
+
+###
+
+### HR Reject
+
+POST {{server}}/hrReject
+Content-Type: application/json
+
+{
+    "ID":"<LEAVE_REQUEST_ID>"
+}
+
+###
+
+GET {{server}}/LeaveRequests
+
+############################################################
+### LEAVE HISTORY
+############################################################
+
+GET {{server}}/leaveHistory(employeeID='<EMPLOYEE_ID>')
+
+############################################################
+### REMAINING LEAVE
+############################################################
+
+GET {{server}}/remainingLeave(
+employeeID='<EMPLOYEE_ID>',
+leaveTypeID=11111111-1111-1111-1111-111111111111
+)
+
+############################################################
+### LEAVE BALANCE
+############################################################
+
+GET {{server}}/LeaveBalances
+
+############################################################
+### TOTAL EMPLOYEES
+############################################################
+
+GET {{server}}/totalEmployees()
+
+############################################################
+### EMPLOYEES BY MANAGER
+############################################################
+
+GET {{server}}/employeesByManager(managerID='<MANAGER_ID>')
+
+###
+
+
+############################################################
+### SAP CAP Leave Management System
+### PART 3 - LEAVE LIFECYCLE & NOTIFICATIONS
+############################################################
+
+@server = http://localhost:4004/odata/v4/leave
+
+############################################################
+### WITHDRAW LEAVE
+############################################################
+
+### Create Leave Request First
+
+POST {{server}}/LeaveRequests
+Content-Type: application/json
+
+{
+    "employee_ID":"<EMPLOYEE_ID>",
+    "leaveType_ID":"11111111-1111-1111-1111-111111111111",
+    "fromDate":"2026-12-10",
+    "toDate":"2026-12-12",
+    "reason":"Personal Work"
+}
+
+###
+
+### Withdraw Leave
+
+POST {{server}}/withdrawLeave
+Content-Type: application/json
+
+{
+    "ID":"<LEAVE_REQUEST_ID>"
+}
+
+###
+
+GET {{server}}/LeaveRequests
+
+############################################################
+### CANCEL LEAVE
+############################################################
+
+### Create Leave
+
+POST {{server}}/LeaveRequests
+Content-Type: application/json
+
+{
+    "employee_ID":"<EMPLOYEE_ID>",
+    "leaveType_ID":"11111111-1111-1111-1111-111111111111",
+    "fromDate":"2027-01-10",
+    "toDate":"2027-01-12",
+    "reason":"Vacation"
+}
+
+###
+
+### Manager Approve
+
+POST {{server}}/managerApprove
+Content-Type: application/json
+
+{
+    "ID":"<LEAVE_REQUEST_ID>"
+}
+
+###
+
+### HR Approve
+
+POST {{server}}/hrApprove
+Content-Type: application/json
+
+{
+    "ID":"<LEAVE_REQUEST_ID>"
+}
+
+###
+
+### Cancel Leave
+
+POST {{server}}/cancelLeave
+Content-Type: application/json
+
+{
+    "ID":"<LEAVE_REQUEST_ID>"
+}
+
+###
+
+GET {{server}}/LeaveBalances
+
+###
+
+GET {{server}}/LeaveRequests
+
+############################################################
+### NOTIFICATIONS
+############################################################
+
+### Get All Notifications
+
+GET {{server}}/Notifications
+
+###
+
+### Unread Notifications
+
+GET {{server}}/Notifications?$filter=isRead eq false
+
+###
+
+### Read Notifications
+
+GET {{server}}/Notifications?$filter=isRead eq true
+
+###
+
+### Notifications by Employee
+
+GET {{server}}/Notifications?$filter=recipient_ID eq '<EMPLOYEE_ID>'
+
+############################################################
+### MARK NOTIFICATION AS READ
+############################################################
+
+### (Only if action exists)
+
+POST {{server}}/markNotificationAsRead
+Content-Type: application/json
+
+{
+    "ID":"<NOTIFICATION_ID>"
+}
+
+###
+
+GET {{server}}/Notifications
+
+############################################################
+### FILTER EXAMPLES
+############################################################
+
+### Approved Leaves
+
+GET {{server}}/LeaveRequests?$filter=status eq 'Approved'
+
+###
+
+### Pending Manager Approval
+
+GET {{server}}/LeaveRequests?$filter=status eq 'Pending Manager Approval'
+
+###
+
+### Pending HR Approval
+
+GET {{server}}/LeaveRequests?$filter=status eq 'Pending HR Approval'
+
+###
+
+### Rejected Leaves
+
+GET {{server}}/LeaveRequests?$filter=status eq 'Rejected'
+
+###
+
+### Withdrawn Leaves
+
+GET {{server}}/LeaveRequests?$filter=status eq 'Withdrawn'
+
+###
+
+### Cancelled Leaves
+
+GET {{server}}/LeaveRequests?$filter=status eq 'Cancelled'
+
+############################################################
+### SEARCH & SORT
+############################################################
+
+### Employees Sorted by Name
+
+GET {{server}}/Employees?$orderby=name
+
+###
+
+### Leave Requests Sorted by Date
+
+GET {{server}}/LeaveRequests?$orderby=fromDate desc
+
+###
+
+### First Five Employees
+
+GET {{server}}/Employees?$top=5
+
+###
+
+### Skip First Employee
+
+GET {{server}}/Employees?$skip=1
+
+############################################################
+### EXPAND RELATIONSHIPS
+############################################################
+
+### Employees with Department
+
+GET {{server}}/Employees?$expand=department
+
+###
+
+### Leave Requests with Employee
+
+GET {{server}}/LeaveRequests?$expand=employee
+
+###
+
+### Leave Requests with Leave Type
+
+GET {{server}}/LeaveRequests?$expand=leaveType
+
+###
+
+### Leave Balance with Employee
+
+GET {{server}}/LeaveBalances?$expand=employee
+
+###
+
+### Leave Balance with Leave Type
+
+GET {{server}}/LeaveBalances?$expand=leaveType
+
+############################################################
+### FINAL DATABASE CHECK
+############################################################
+
+GET {{server}}/Departments
+
+###
+
+GET {{server}}/Employees
+
+###
+
+GET {{server}}/LeaveTypes
+
+###
+
+GET {{server}}/Holidays
+
+###
+
+GET {{server}}/LeaveBalances
+
+###
+
+GET {{server}}/LeaveRequests
+
+###
+
+GET {{server}}/Notifications
+
+############################################################
+### END OF TEST FILE
+############################################################

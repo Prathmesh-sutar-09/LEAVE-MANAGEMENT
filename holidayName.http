@@ -1,0 +1,27 @@
+POST http://localhost:4004/odata/v4/leave/Holidays
+Content-Type: application/json
+
+{
+    "HolidayName":"Ganesh Chaturthi",
+    "holidayDate":"2026-09-15",
+    "description":"Festival Holiday",
+    "isOptional":false
+}
+###
+GET http://localhost:4004/odata/v4/leave/Holidays
+
+###
+POST http://localhost:4004/odata/v4/leave/deactivateHoliday
+Content-Type: application/json
+
+{
+    "ID":"72294241-6fd9-4c29-b1e1-f30b914a7811"
+}
+
+###
+POST http://localhost:4004/odata/v4/leave/activateHoliday
+Content-Type: application/json
+
+{
+    "ID":"72294241-6fd9-4c29-b1e1-f30b914a7811"
+}

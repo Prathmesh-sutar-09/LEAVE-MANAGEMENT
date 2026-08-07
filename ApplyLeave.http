@@ -1,0 +1,49 @@
+POST http://localhost:4004/odata/v4/leave/LeaveRequests
+Content-Type: application/json
+
+{
+    "employee_ID":"714d63ff-52b1-4ff2-a62d-d6509c3a18f9",
+    "leaveType":"Casual",
+    "fromDate":"2026-07-30",
+    "toDate":"2026-07-31",
+    "reason":"jashna-a-Function"
+}
+###
+POST http://localhost:4004/odata/v4/leave/Employees
+Content-Type: application/json
+
+{
+    "employeeId": "EMP002",
+    "name": "Rahul",
+    "department": "IT"
+}
+###
+GET http://localhost:4004/odata/v4/leave/LeaveRequests
+
+###
+GET http://localhost:4004/odata/v4/leave/Employees
+
+###
+POST http://localhost:4004/odata/v4/leave/approveLeave
+Content-Type: application/json
+
+{
+    "ID": "19a281d7-1fc9-4226-84de-4350e57361bc"
+}
+
+###
+GET http://localhost:4004/odata/v4/leave/totalEmployees
+
+###
+POST http://localhost:4004/odata/v4/leave/rejectLeave
+Content-Type: application/json
+
+{
+    "ID": "c26b8331-1362-4fe9-abd2-7b53a6b5abc6"
+}
+
+###
+GET http://localhost:4004/odata/v4/leave/remainingLeave(employeeID='3540dda5-d4b7-4cab-9798-df2c037899b9')
+
+###
+GET http://localhost:4004/odata/v4/leave/leaveHistory(employeeID='19a281d7-1fc9-4226-84de-4350e57361bc')

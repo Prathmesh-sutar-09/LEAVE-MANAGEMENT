@@ -1,0 +1,43 @@
+POST http://localhost:4004/odata/v4/leave/Departments
+Content-Type: application/json
+
+{
+    "name": "IT"
+}
+
+###
+GET http://localhost:4004/odata/v4/leave/Departments
+
+###
+GET http://localhost:4004/odata/v4/leave/Employees?$expand=department
+
+###
+POST http://localhost:4004/odata/v4/leave/Employees
+Content-Type: application/json
+
+{
+    "employeeId": "EMP100",
+    "name": "Alice",
+    "designation": "Project Manager",
+    "joiningDate": "2025-01-01",
+    "department_ID": "57a52b7c-44a7-4520-a7c3-cb3ee50722ba"
+}
+
+###
+POST http://localhost:4004/odata/v4/leave/Employees
+Content-Type: application/json
+
+{
+    "employeeId": "EMP101",
+    "name": "Ramesh",
+    "designation": "Software Engineer",
+    "joiningDate": "2026-01-01",
+    "department_ID": "57a52b7c-44a7-4520-a7c3-cb3ee50722ba",
+    "manager_ID": "9996e2d6-a406-429f-a9b6-7043ff6006ca"
+}
+
+###
+GET http://localhost:4004/odata/v4/leave/Employees?$expand=manager
+
+###
+GET http://localhost:4004/odata/v4/leave/employeesByManager(managerID=6385c6b4-a10f-4e20-b887-7efab8138135)

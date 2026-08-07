@@ -1,0 +1,86 @@
+### Create Annual Leave Type
+
+POST http://localhost:4004/odata/v4/leave/LeaveTypes
+Content-Type: application/json
+
+{
+    "name": "Annual",
+    "yearlyAllocation": 20,
+    "description": "Annual Leave"
+}
+###
+POST http://localhost:4004/odata/v4/leave/LeaveTypes
+Content-Type: application/json
+
+{
+    "name": "Sick",
+    "yearlyAllocation": 10,
+    "description": "Sick Leave"
+}
+###
+POST http://localhost:4004/odata/v4/leave/LeaveTypes
+Content-Type: application/json
+
+{
+    "name": "Casual",
+    "yearlyAllocation": 8,
+    "description": "Casual Leave"
+}
+###
+GET http://localhost:4004/odata/v4/leave/LeaveTypes
+###
+GET http://localhost:4004/odata/v4/leave/LeaveBalances
+
+###
+###  Annual
+
+GET http://localhost:4004/odata/v4/leave/LeaveTypes
+
+###
+POST http://localhost:4004/odata/v4/leave/LeaveRequests
+Content-Type: application/json
+
+{
+    "employee_ID":"98b8ef58-141a-4562-8beb-1ef1b668e675",
+    "leaveType_ID":"11111111-1111-1111-1111-111111111111",
+    "fromDate":"2026-09-01",
+    "toDate":"2026-09-05",
+    "reason":"Family Function"
+}
+###
+GET http://localhost:4004/odata/v4/leave/LeaveRequests
+###
+POST http://localhost:4004/odata/v4/leave/managerApprove
+Content-Type: application/json
+
+{
+    "ID":"42440df2-9d27-4a24-8899-f782fbc607a6"
+}
+###
+POST http://localhost:4004/odata/v4/leave/hrApprove
+Content-Type: application/json
+
+{
+    "ID":"42440df2-9d27-4a24-8899-f782fbc607a6"
+}
+###
+POST http://localhost:4004/odata/v4/leave/managerReject
+Content-Type: application/json
+
+{
+    "ID":"3ae6a9bf-a024-452a-aadc-67300398863b"
+}
+###
+POST http://localhost:4004/odata/v4/leave/hrReject
+Content-Type: application/json
+
+{
+    "ID":"42440df2-9d27-4a24-8899-f782fbc607a6"
+}
+### 
+GET http://localhost:4004/odata/v4/leave/LeaveBalances
+
+###
+GET http://localhost:4004/odata/v4/leave/Notifications
+
+###

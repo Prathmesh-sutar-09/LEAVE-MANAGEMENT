@@ -1,0 +1,49 @@
+POST http://localhost:4004/odata/v4/leave/LeaveRequests
+Content-Type: application/json
+
+{
+    "employee_ID":"2fa20987-e964-4c38-b147-1d3203e440d9",
+    "leaveType_ID":"11111111-1111-1111-1111-111111111111",
+    "fromDate":"2026-08-25",
+    "toDate":"2026-08-27",
+    "reason":"Vacation"
+}
+
+###
+GET http://localhost:4004/odata/v4/leave/LeaveRequests
+###
+POST http://localhost:4004/odata/v4/leave/approveLeave
+Content-Type: application/json
+
+{
+    "ID": "22e94c62-1971-4f3b-b105-0ec0b69dfebb"
+}
+
+###
+POST http://localhost:4004/odata/v4/leave/approveLeave
+Content-Type: application/json
+
+{
+    "ID":"22e94c62-1971-4f3b-b105-0ec0b69dfebb"
+}
+
+###
+GET http://localhost:4004/odata/v4/leave/LeaveRequests(8c7fd791-7201-48d9-a4a8-9369b537a264)
+###
+GET http://localhost:4004/odata/v4/leave/LeaveBalances
+
+###
+POST http://localhost:4004/odata/v4/leave/withdrawLeave
+Content-Type: application/json
+
+{
+    "ID":"3878011a-7726-4f15-98db-db71de9d152a"
+}
+
+###
+POST http://localhost:4004/odata/v4/leave/cancelLeave
+Content-Type: application/json
+
+{
+    "ID":"22e94c62-1971-4f3b-b105-0ec0b69dfebb"
+}
