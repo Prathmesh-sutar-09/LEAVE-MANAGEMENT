@@ -47,3 +47,66 @@ Content-Type: application/json
 {
     "ID":"22e94c62-1971-4f3b-b105-0ec0b69dfebb"
 }
+
+###
+POST http://localhost:4004/odata/v4/leave/leaveSummary
+Content-Type: application/json
+
+{}
+
+###
+POST http://localhost:4004/odata/v4/leave/departmentLeaveReport
+Content-Type: application/json
+
+{}
+
+###
+POST http://localhost:4004/odata/v4/leave/leaveTypeUsageReport
+Content-Type: application/json
+
+{}
+###
+GET http://localhost:4004/odata/v4/leave/LeaveTypes
+
+###
+### Delete duplicate Casual
+DELETE http://localhost:4004/odata/v4/leave/LeaveTypes(3a88a994-5327-42ab-a2e8-28c3e9cb0a7c)
+
+###
+
+### Delete duplicate Annual
+DELETE http://localhost:4004/odata/v4/leave/LeaveTypes(79007f7c-e603-4fcc-9607-3aec78d3f3a8)
+
+###
+
+### Delete duplicate Sick
+DELETE http://localhost:4004/odata/v4/leave/LeaveTypes(b73c3700-9fa2-4ef4-b4e8-64d266e864b9)
+
+###
+
+### Delete duplicate Sick
+DELETE http://localhost:4004/odata/v4/leave/LeaveTypes(c7eb0e08-aae9-471e-9681-ce11e1a71669)
+
+###
+POST http://localhost:4004/odata/v4/leave/monthlyLeaveReport
+Content-Type: application/json
+
+{}
+
+###
+POST http://localhost:4004/odata/v4/leave/leaveBalanceReport
+Content-Type: application/json
+
+{}
+
+###
+POST http://localhost:4004/odata/v4/leave/pendingApprovalReport
+Content-Type: application/json
+
+{}
+
+###
+POST http://localhost:4004/odata/v4/leave/dashboardKPIs
+Content-Type: application/json
+
+{}

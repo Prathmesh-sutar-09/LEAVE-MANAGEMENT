@@ -744,4 +744,371 @@ module.exports = cds.service.impl(async function () {
 
     });
 
+    // Leave Summary Report
+    this.on("leaveSummary", async () => {
+        const leaves = await SELECT.from(LeaveRequests);
+
+        const summary = {
+            total: leaves.length,
+            pendingManager: 0,
+            pendingHR: 0,
+            approved: 0,
+            rejected: 0,
+            withdrawn: 0,
+            cancelled: 0
+        };
+
+        leaves.forEach(leave => {
+            switch (leave.status) {
+
+                case "Pending Manager Approval":
+                    summary.pendingManager++;
+                    break;
+
+                case "Pending HR Approval":
+                    summary.pendingHR++;
+                    break;
+
+                case "Approved":
+                    summary.approved++;
+                    break;
+
+                case "Rejected":
+                    summary.rejected++;
+                    break;
+
+                case "Withdrawn":
+                    summary.withdrawn++;
+                    break;
+
+                case "Cancelled":
+                    summary.cancelled++;
+                    break;
+            }
+
+        });
+        return JSON.stringify(summary);
+
+    });
+
+    // Department-wise Leave Report
+    this.on("departmentLeaveReport", async () => {
+
+        const employees = await SELECT
+            .from(Employees);
+
+        const leaves = await SELECT
+            .from(LeaveRequests);
+
+        const departments = await SELECT
+            .from(Departments);
+
+        const report = [];
+
+        for (const department of departments) {
+
+            const departmentEmployees = employees.filter(
+                employee =>
+                    employee.department_ID === department.ID
+            );
+
+            const employeeIds = departmentEmployees.map(
+                employee => employee.ID
+            );
+
+            const departmentLeaves = leaves.filter(
+                leave =>
+                    employeeIds.includes(leave.employee_ID)
+            );
+
+            report.push({
+                department: department.name,
+                totalRequests: departmentLeaves.length,
+                approved: departmentLeaves.filter(
+                    leave => leave.status === "Approved"
+                ).length,
+                pendingManager: departmentLeaves.filter(
+                    leave => leave.status === "Pending Manager Approval"
+                ).length,
+                pendingHR: departmentLeaves.filter(
+                    leave => leave.status === "Pending HR Approval"
+                ).length,
+                rejected: departmentLeaves.filter(
+                    leave => leave.status === "Rejected"
+                ).length,
+                withdrawn: departmentLeaves.filter(
+                    leave => leave.status === "Withdrawn"
+                ).length,
+                cancelled: departmentLeaves.filter(
+                    leave => leave.status === "Cancelled"
+                ).length
+            });
+        }
+
+        return JSON.stringify(report);
+
+    });
+    // Leave Type Usage Report
+    this.on("leaveTypeUsageReport", async () => {
+
+        const leaveTypes = await SELECT
+            .from(LeaveTypes);
+
+        const leaves = await SELECT
+            .from(LeaveRequests);
+
+        const report = [];
+
+        for (const leaveType of leaveTypes) {
+
+            const typeLeaves = leaves.filter(
+                leave => leave.leaveType_ID === leaveType.ID
+            );
+
+            report.push({
+                leaveType: leaveType.name,
+                totalRequests: typeLeaves.length,
+
+                approved: typeLeaves.filter(
+                    leave => leave.status === "Approved"
+                ).length,
+
+                pendingManager: typeLeaves.filter(
+                    leave => leave.status === "Pending Manager Approval"
+                ).length,
+
+                pendingHR: typeLeaves.filter(
+                    leave => leave.status === "Pending HR Approval"
+                ).length,
+
+                rejected: typeLeaves.filter(
+                    leave => leave.status === "Rejected"
+                ).length,
+
+                withdrawn: typeLeaves.filter(
+                    leave => leave.status === "Withdrawn"
+                ).length,
+
+                cancelled: typeLeaves.filter(
+                    leave => leave.status === "Cancelled"
+                ).length
+            });
+        }
+
+        return JSON.stringify(report);
+
+    });
+
+    // Monthly Leave Report
+    this.on("monthlyLeaveReport", async () => {
+
+        const leaves = await SELECT
+            .from(LeaveRequests);
+
+        const monthlyData = {};
+
+        leaves.forEach(leave => {
+
+            if (!leave.fromDate) {
+                return;
+            }
+
+            const date = new Date(leave.fromDate);
+
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, "0");
+
+            const key = `${year}-${month}`;
+
+            if (!monthlyData[key]) {
+
+                monthlyData[key] = {
+                    month: key,
+                    totalRequests: 0,
+                    approved: 0,
+                    pendingManager: 0,
+                    pendingHR: 0,
+                    rejected: 0,
+                    withdrawn: 0,
+                    cancelled: 0
+                };
+
+            }
+
+            monthlyData[key].totalRequests++;
+
+            switch (leave.status) {
+
+                case "Pending Manager Approval":
+                    monthlyData[key].pendingManager++;
+                    break;
+
+                case "Pending HR Approval":
+                    monthlyData[key].pendingHR++;
+                    break;
+
+                case "Approved":
+                    monthlyData[key].approved++;
+                    break;
+
+                case "Rejected":
+                    monthlyData[key].rejected++;
+                    break;
+
+                case "Withdrawn":
+                    monthlyData[key].withdrawn++;
+                    break;
+
+                case "Cancelled":
+                    monthlyData[key].cancelled++;
+                    break;
+            }
+
+        });
+
+        const report = Object.values(monthlyData)
+            .sort((a, b) => a.month.localeCompare(b.month));
+
+        return JSON.stringify(report);
+
+    });
+    // Leave Balance Report
+    this.on("leaveBalanceReport", async () => {
+
+        const balances = await SELECT.from(LeaveBalances);
+        const employees = await SELECT.from(Employees);
+        const leaveTypes = await SELECT.from(LeaveTypes);
+
+        const report = [];
+
+        for (const balance of balances) {
+
+            const employee = employees.find(
+                emp => emp.ID === balance.employee_ID
+            );
+
+            const leaveType = leaveTypes.find(
+                type => type.ID === balance.leaveType_ID
+            );
+
+            if (!employee || !leaveType) {
+                continue;
+            }
+
+            report.push({
+                employeeId: employee.employeeId,
+                employeeName: employee.name,
+                leaveType: leaveType.name,
+                totalLeave: balance.totalLeave,
+                usedLeave: balance.usedLeave,
+                remainingLeave: balance.remainingLeave
+            });
+        }
+
+        return JSON.stringify(report);
+
+    });
+
+    // Pending Approval Report
+    this.on("pendingApprovalReport", async () => {
+
+        const leaves = await SELECT.from(LeaveRequests);
+        const employees = await SELECT.from(Employees);
+        const leaveTypes = await SELECT.from(LeaveTypes);
+
+        const report = {
+            pendingManagerApproval: [],
+            pendingHRApproval: []
+        };
+
+        for (const leave of leaves) {
+
+            const employee = employees.find(
+                emp => emp.ID === leave.employee_ID
+            );
+
+            const leaveType = leaveTypes.find(
+                type => type.ID === leave.leaveType_ID
+            );
+
+            if (!employee || !leaveType) {
+                continue;
+            }
+
+            const data = {
+                leaveRequestID: leave.ID,
+                employeeId: employee.employeeId,
+                employeeName: employee.name,
+                leaveType: leaveType.name,
+                fromDate: leave.fromDate,
+                toDate: leave.toDate,
+                reason: leave.reason
+            };
+
+            if (leave.status === "Pending Manager Approval") {
+                report.pendingManagerApproval.push(data);
+            }
+
+            if (leave.status === "Pending HR Approval") {
+                report.pendingHRApproval.push(data);
+            }
+        }
+
+        return JSON.stringify(report);
+
+    });
+
+    // Dashboard KPIs
+    this.on("dashboardKPIs", async () => {
+
+        const employees = await SELECT.from(Employees);
+        const leaves = await SELECT.from(LeaveRequests);
+        const holidays = await SELECT.from(Holidays);
+
+        const kpis = {
+            totalEmployees: employees.length,
+            totalLeaveRequests: leaves.length,
+            approvedLeaves: 0,
+            pendingManagerApproval: 0,
+            pendingHRApproval: 0,
+            rejectedLeaves: 0,
+            withdrawnLeaves: 0,
+            cancelledLeaves: 0,
+            totalHolidays: holidays.length
+        };
+
+        leaves.forEach(leave => {
+
+            switch (leave.status) {
+
+                case "Approved":
+                    kpis.approvedLeaves++;
+                    break;
+
+                case "Pending Manager Approval":
+                    kpis.pendingManagerApproval++;
+                    break;
+
+                case "Pending HR Approval":
+                    kpis.pendingHRApproval++;
+                    break;
+
+                case "Rejected":
+                    kpis.rejectedLeaves++;
+                    break;
+
+                case "Withdrawn":
+                    kpis.withdrawnLeaves++;
+                    break;
+
+                case "Cancelled":
+                    kpis.cancelledLeaves++;
+                    break;
+            }
+
+        });
+
+        return JSON.stringify(kpis);
+
+    });
 });

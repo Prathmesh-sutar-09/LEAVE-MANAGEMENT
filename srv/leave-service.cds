@@ -16,6 +16,13 @@ service LeaveService {
     action cancelLeave(ID : UUID) returns String;
     action deactivateHoliday(ID : UUID) returns String;
     action activateHoliday(ID : UUID) returns String;
+    action leaveSummary() returns String;
+    action departmentLeaveReport() returns String;
+    action leaveTypeUsageReport() returns String;
+    action monthlyLeaveReport() returns String;
+    action leaveBalanceReport() returns String;
+    action pendingApprovalReport() returns String;
+    action dashboardKPIs() returns String;
     function remainingLeave(employeeID : UUID, leaveType :UUID) returns Integer;
     function leaveHistory(employeeID : UUID) returns many LeaveRequests;
     function totalEmployees() returns Integer;
