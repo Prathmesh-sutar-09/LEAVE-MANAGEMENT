@@ -2,10 +2,10 @@ POST http://localhost:4004/odata/v4/leave/LeaveRequests
 Content-Type: application/json
 
 {
-    "employee_ID":"2fa20987-e964-4c38-b147-1d3203e440d9",
+    "employee_ID":"816440ef-08a4-438e-a3c3-3f55a04a93cd",
     "leaveType_ID":"11111111-1111-1111-1111-111111111111",
-    "fromDate":"2026-08-25",
-    "toDate":"2026-08-27",
+    "fromDate":"2026-09-25",
+    "toDate":"2026-09-27",
     "reason":"Vacation"
 }
 
@@ -110,3 +110,115 @@ POST http://localhost:4004/odata/v4/leave/dashboardKPIs
 Content-Type: application/json
 
 {}
+
+###
+
+
+
+
+
+### Get Audit Logs
+GET http://localhost:4004/odata/v4/leave/AuditLogs
+
+### Manager Reject Leave### Manager Approve Leave
+POST http://localhost:4004/odata/v4/leave/managerApprove
+Content-Type: application/json
+
+{
+    "ID": "401738e5-854c-466e-8daf-cda2593c71fc"
+}
+
+
+### Manager Reject
+POST http://localhost:4004/odata/v4/leave/managerReject
+Content-Type: application/json
+
+{
+    "ID": "9a901baf-2b6e-44d3-821b-789b2c80f84d"
+}
+
+### HR Approve Leave
+POST http://localhost:4004/odata/v4/leave/hrApprove
+Content-Type: application/json
+
+{
+    "ID": "c3d8c936-1159-4f6a-ab2a-ba1892ba9aa4"
+}
+
+
+### HR Reject
+POST http://localhost:4004/odata/v4/leave/hrReject
+Content-Type: application/json
+
+{
+    "ID": "401738e5-854c-466e-8daf-cda2593c71fc"
+}
+
+
+### Apply Leave
+POST http://localhost:4004/odata/v4/leave/LeaveRequests
+Content-Type: application/json
+
+{
+    "employee_ID": "816440ef-08a4-438e-a3c3-3f55a04a93cd",
+    "leaveType_ID": "11111111-1111-1111-1111-111111111111",
+    "fromDate": "2026-09-14",
+    "toDate": "2026-09-16",
+    "reason": "Family Function"
+}
+
+### Audit History
+GET http://localhost:4004/odata/v4/leave/auditHistory
+
+### Employee Notifications
+GET http://localhost:4004/odata/v4/leave/employeeNotifications(employeeID=816440ef-08a4-438e-a3c3-3f55a04a93cd)
+
+### Get Unread Notifications
+GET http://localhost:4004/odata/v4/leave/unreadNotifications(employeeID=816440ef-08a4-438e-a3c3-3f55a04a93cd)
+
+### Mark Notification as Read
+POST http://localhost:4004/odata/v4/leave/markNotificationRead
+Content-Type: application/json
+
+{
+    "ID": "4f4b208d-e5d6-4e53-9d7b-bf490d6567e4"
+}
+
+### Get Unread Notifications
+GET http://localhost:4004/odata/v4/leave/unreadNotifications(employeeID=816440ef-08a4-438e-a3c3-3f55a04a93cd)
+
+
+### Mark All Notifications as Read
+POST http://localhost:4004/odata/v4/leave/markAllNotificationsRead
+Content-Type: application/json
+
+{
+    "employeeID": "816440ef-08a4-438e-a3c3-3f55a04a93cd"
+}
+
+### Unread Notification Count
+GET http://localhost:4004/odata/v4/leave/unreadNotificationCount(employeeID=816440ef-08a4-438e-a3c3-3f55a04a93cd)
+
+### Filter HR Approved Notifications
+GET http://localhost:4004/odata/v4/leave/filterNotifications(employeeID=816440ef-08a4-438e-a3c3-3f55a04a93cd,type='HR_APPROVED',isRead=false)
+
+
+### Filter Unread Notifications
+GET http://localhost:4004/odata/v4/leave/filterNotifications(employeeID=816440ef-08a4-438e-a3c3-3f55a04a93cd,type=null,isRead=false)
+
+### Filter Read Notifications
+GET http://localhost:4004/odata/v4/leave/filterNotifications(employeeID=816440ef-08a4-438e-a3c3-3f55a04a93cd,type=null,isRead=true)
+
+### 1. All Notifications
+GET http://localhost:4004/odata/v4/leave/employeeNotifications(employeeID=816440ef-08a4-438e-a3c3-3f55a04a93cd)
+
+### 5. Check Unread Count Again
+GET http://localhost:4004/odata/v4/leave/unreadNotificationCount(employeeID=816440ef-08a4-438e-a3c3-3f55a04a93cd)
+
+### 6. Mark All as Read
+POST http://localhost:4004/odata/v4/leave/markAllNotificationsRead
+Content-Type: application/json
+
+{
+    "employeeID": "816440ef-08a4-438e-a3c3-3f55a04a93cd"
+}

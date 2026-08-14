@@ -62,3 +62,14 @@ entity Notifications {
     isRead          : Boolean default false;
     createdAt       : Timestamp;
 }
+
+entity AuditLogs {
+    key ID          : UUID;
+    action          : String(50);
+    performedBy     : Association to Employees;
+    leaveRequest    : Association to LeaveRequests;
+    oldStatus       : String(30);
+    newStatus       : String(30);
+    description     : String(500);
+    createdAt       : Timestamp;
+}

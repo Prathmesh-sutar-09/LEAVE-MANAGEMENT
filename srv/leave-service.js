@@ -12,7 +12,8 @@ module.exports = cds.service.impl(async function () {
         LeaveBalances,
         Departments,
         Holidays,
-        Notifications
+        Notifications,
+        AuditLogs
     } = this.entities;
 
 
@@ -148,6 +149,7 @@ module.exports = cds.service.impl(async function () {
 
         const { ID } = req.data;
 
+        // Find Holiday
         const holiday = await SELECT.one
             .from(Holidays)
             .where({ ID });
@@ -160,21 +162,33 @@ module.exports = cds.service.impl(async function () {
             return req.error(400, "Holiday is already inactive.");
         }
 
+        // Update Holiday
         await UPDATE(Holidays)
             .set({
                 isActive: false
             })
             .where({ ID });
 
+        // Audit Log
+        await INSERT.into(AuditLogs).entries({
+            action: "HOLIDAY_DEACTIVATED",
+            performedBy_ID: null,
+            leaveRequest_ID: null,
+            oldStatus: "Active",
+            newStatus: "Inactive",
+            description: `Holiday "${holiday.HolidayName}" was deactivated.`,
+            createdAt: new Date()
+        });
+
         return "Holiday deactivated successfully.";
 
     });
-
     // Activate Holiday
     this.on("activateHoliday", async (req) => {
 
         const { ID } = req.data;
 
+        // Find Holiday
         const holiday = await SELECT.one
             .from(Holidays)
             .where({ ID });
@@ -187,11 +201,23 @@ module.exports = cds.service.impl(async function () {
             return req.error(400, "Holiday is already active.");
         }
 
+        // Update Holiday
         await UPDATE(Holidays)
             .set({
                 isActive: true
             })
             .where({ ID });
+
+        // Audit Log
+        await INSERT.into(AuditLogs).entries({
+            action: "HOLIDAY_ACTIVATED",
+            performedBy_ID: null,
+            leaveRequest_ID: null,
+            oldStatus: "Inactive",
+            newStatus: "Active",
+            description: `Holiday "${holiday.HolidayName}" was activated.`,
+            createdAt: new Date()
+        });
 
         return "Holiday activated successfully.";
 
@@ -274,23 +300,35 @@ module.exports = cds.service.impl(async function () {
 
     });
 
-    // Notification when Leave is Applied
+    // Notification + Audit Log when Leave is Applied
     this.after("CREATE", "LeaveRequests", async (data) => {
 
         const employee = await SELECT.one
             .from(Employees)
             .where({ ID: data.employee_ID });
 
-        // Return only if employee doesn't exist OR has no manager
-        if (!employee || !employee.manager_ID) {
-            return;
+        // Manager notification
+        if (employee && employee.manager_ID) {
+
+            await INSERT.into(Notifications).entries({
+                recipient_ID: employee.manager_ID,
+                title: "New Leave Request",
+                message: `${employee.name} has applied for leave from ${data.fromDate} to ${data.toDate}.`,
+                type: "LEAVE_APPLIED",
+                createdAt: new Date()
+            });
+
         }
 
-        await INSERT.into(Notifications).entries({
-            recipient_ID: employee.manager_ID,
-            title: "New Leave Request",
-            message: `${employee.name} has applied for leave from ${data.fromDate} to ${data.toDate}.`,
-            type: "LEAVE_APPLIED",
+        // Audit Log
+        await INSERT.into(AuditLogs).entries({
+            action: "LEAVE_APPLIED",
+            performedBy_ID: data.employee_ID,
+            leaveRequest_ID: data.ID,
+            oldStatus: "",
+            newStatus: data.status,
+            description:
+                `${employee ? employee.name : "Employee"} applied for leave from ${data.fromDate} to ${data.toDate}.`,
             createdAt: new Date()
         });
 
@@ -337,6 +375,17 @@ module.exports = cds.service.impl(async function () {
             })
             .where({ ID });
 
+        // Audit Log
+        await INSERT.into(AuditLogs).entries({
+            action: "MANAGER_APPROVED",
+            performedBy_ID: null,
+            leaveRequest_ID: leave.ID,
+            oldStatus: "Pending Manager Approval",
+            newStatus: "Pending HR Approval",
+            description: "Manager approved the leave request.",
+            createdAt: new Date()
+        });
+
         // Notify Employee
         await INSERT.into(Notifications).entries({
 
@@ -375,7 +424,7 @@ module.exports = cds.service.impl(async function () {
             return req.error(400, "Leave is not waiting for HR approval.");
         }
 
-        // Get Leave Balance
+        // Find Leave Balance
         const balance = await SELECT.one
             .from(LeaveBalances)
             .where({
@@ -387,12 +436,13 @@ module.exports = cds.service.impl(async function () {
             return req.error(404, "Leave Balance Not Found");
         }
 
-        // Calculate Leave Days
+        // Calculate working days
         const leaveDays = await calculateLeaveDays(
             leave.fromDate,
             leave.toDate
         );
 
+        // Check balance
         if (balance.remainingLeave < leaveDays) {
             return req.error(400, "Insufficient Leave Balance");
         }
@@ -405,12 +455,23 @@ module.exports = cds.service.impl(async function () {
             })
             .where({ ID: balance.ID });
 
-        // Final Approval
+        // Update Leave Status
         await UPDATE(LeaveRequests)
             .set({
                 status: "Approved"
             })
             .where({ ID });
+
+        // Audit Log
+        await INSERT.into(AuditLogs).entries({
+            action: "HR_APPROVED",
+            performedBy_ID: null,
+            leaveRequest_ID: leave.ID,
+            oldStatus: "Pending HR Approval",
+            newStatus: "Approved",
+            description: `HR approved the leave request. ${leaveDays} day(s) deducted from leave balance.`,
+            createdAt: new Date()
+        });
 
         // Notify Employee
         await INSERT.into(Notifications).entries({
@@ -419,9 +480,10 @@ module.exports = cds.service.impl(async function () {
 
             title: "Leave Approved",
 
-            message: `Your leave request has been fully approved. ${leaveDays} day(s) have been deducted from your leave balance.`,
+            message:
+                `Your leave request has been fully approved. ${leaveDays} day(s) have been deducted from your leave balance.`,
 
-            type: "LEAVE_APPROVED",
+            type: "HR_APPROVED",
 
             createdAt: new Date()
 
@@ -430,7 +492,6 @@ module.exports = cds.service.impl(async function () {
         return `HR approved. ${leaveDays} day(s) deducted.`;
 
     });
-
     // Manager Reject
     this.on("managerReject", async (req) => {
 
@@ -445,7 +506,7 @@ module.exports = cds.service.impl(async function () {
             return req.error(404, "Leave Request Not Found");
         }
 
-        // Only Manager can reject pending manager requests
+        // Only manager can reject pending manager requests
         if (leave.status !== "Pending Manager Approval") {
             return req.error(400, "Leave is not waiting for manager approval.");
         }
@@ -457,19 +518,24 @@ module.exports = cds.service.impl(async function () {
             })
             .where({ ID });
 
+        // Audit Log
+        await INSERT.into(AuditLogs).entries({
+            action: "MANAGER_REJECTED",
+            performedBy_ID: null,
+            leaveRequest_ID: leave.ID,
+            oldStatus: "Pending Manager Approval",
+            newStatus: "Rejected",
+            description: "Manager rejected the leave request.",
+            createdAt: new Date()
+        });
+
         // Notify Employee
         await INSERT.into(Notifications).entries({
-
             recipient_ID: leave.employee_ID,
-
             title: "Leave Rejected",
-
             message: "Your leave request has been rejected by your manager.",
-
             type: "MANAGER_REJECTED",
-
             createdAt: new Date()
-
         });
 
         return "Manager rejected the leave request.";
@@ -501,6 +567,17 @@ module.exports = cds.service.impl(async function () {
                 status: "Rejected"
             })
             .where({ ID });
+
+        // Audit Log
+        await INSERT.into(AuditLogs).entries({
+            action: "HR_REJECTED",
+            performedBy_ID: null,
+            leaveRequest_ID: leave.ID,
+            oldStatus: "Pending HR Approval",
+            newStatus: "Rejected",
+            description: "HR rejected the leave request.",
+            createdAt: new Date()
+        });
 
         // Notify Employee
         await INSERT.into(Notifications).entries({
@@ -556,7 +633,9 @@ module.exports = cds.service.impl(async function () {
             );
         }
 
-        // Withdraw Leave
+        // Store old status
+        const oldStatus = leave.status;
+
         // Withdraw Leave
         await UPDATE(LeaveRequests)
             .set({
@@ -582,7 +661,19 @@ module.exports = cds.service.impl(async function () {
 
         }
 
+        // Audit Log
+        await INSERT.into(AuditLogs).entries({
+            action: "LEAVE_WITHDRAWN",
+            performedBy_ID: leave.employee_ID,
+            leaveRequest_ID: leave.ID,
+            oldStatus: oldStatus,
+            newStatus: "Withdrawn",
+            description: `${employee ? employee.name : "Employee"} withdrew the leave request.`,
+            createdAt: new Date()
+        });
+
         return "Leave withdrawn successfully.";
+
     });
 
     // Cancel Leave
@@ -601,24 +692,42 @@ module.exports = cds.service.impl(async function () {
 
         // Only approved leave can be cancelled
         if (leave.status === "Pending Manager Approval") {
-            return req.error(400, "Pending leave cannot be cancelled. Withdraw it instead.");
+            return req.error(
+                400,
+                "Pending leave cannot be cancelled. Withdraw it instead."
+            );
         }
 
         if (leave.status === "Pending HR Approval") {
-            return req.error(400, "Pending leave cannot be cancelled. Withdraw it instead.");
+            return req.error(
+                400,
+                "Pending leave cannot be cancelled. Withdraw it instead."
+            );
         }
 
         if (leave.status === "Rejected") {
-            return req.error(400, "Rejected leave cannot be cancelled.");
+            return req.error(
+                400,
+                "Rejected leave cannot be cancelled."
+            );
         }
 
         if (leave.status === "Withdrawn") {
-            return req.error(400, "Withdrawn leave cannot be cancelled.");
+            return req.error(
+                400,
+                "Withdrawn leave cannot be cancelled."
+            );
         }
 
         if (leave.status === "Cancelled") {
-            return req.error(400, "Leave is already cancelled.");
+            return req.error(
+                400,
+                "Leave is already cancelled."
+            );
         }
+
+        // Store old status
+        const oldStatus = leave.status;
 
         // Get Leave Balance
         const balance = await SELECT.one
@@ -647,7 +756,6 @@ module.exports = cds.service.impl(async function () {
             .where({ ID: balance.ID });
 
         // Update Status
-        // Update Status
         await UPDATE(LeaveRequests)
             .set({
                 status: "Cancelled"
@@ -671,6 +779,18 @@ module.exports = cds.service.impl(async function () {
             });
 
         }
+
+        // Audit Log
+        await INSERT.into(AuditLogs).entries({
+            action: "LEAVE_CANCELLED",
+            performedBy_ID: leave.employee_ID,
+            leaveRequest_ID: leave.ID,
+            oldStatus: oldStatus,
+            newStatus: "Cancelled",
+            description:
+                `Approved leave was cancelled. ${leaveDays} day(s) restored to leave balance.`,
+            createdAt: new Date()
+        });
 
         return `Leave cancelled successfully. ${leaveDays} day(s) restored.`;
 
@@ -1105,10 +1225,222 @@ module.exports = cds.service.impl(async function () {
                     kpis.cancelledLeaves++;
                     break;
             }
-
         });
 
         return JSON.stringify(kpis);
+
+    });
+
+    // Audit History
+    this.on("auditHistory", async () => {
+        const logs = await SELECT
+            .from(AuditLogs)
+            .orderBy({
+                createdAt: "desc"
+            });
+
+        return logs;
+
+    });
+
+    // Get Employee Notifications
+    this.on("employeeNotifications", async (req) => {
+
+        const { employeeID } = req.data;
+
+        // Check Employee
+        const employee = await SELECT.one
+            .from(Employees)
+            .where({ ID: employeeID });
+
+        if (!employee) {
+            return req.error(404, "Employee Not Found");
+        }
+
+        // Get Notifications
+        const notifications = await SELECT
+            .from(Notifications)
+            .where({
+                recipient_ID: employeeID
+            })
+            .orderBy({
+                createdAt: "desc"
+            });
+
+        return notifications;
+
+    });
+
+    // Get Unread Employee Notifications
+    this.on("unreadNotifications", async (req) => {
+
+        const { employeeID } = req.data;
+
+        // Check Employee
+        const employee = await SELECT.one
+            .from(Employees)
+            .where({ ID: employeeID });
+
+        if (!employee) {
+            return req.error(404, "Employee Not Found");
+        }
+
+        // Get Unread Notifications
+        const notifications = await SELECT
+            .from(Notifications)
+            .where({
+                recipient_ID: employeeID,
+                isRead: false
+            })
+            .orderBy({
+                createdAt: "desc"
+            });
+
+        return notifications;
+
+    });
+
+    // Mark Notification as Read
+    this.on("markNotificationRead", async (req) => {
+
+        const { ID } = req.data;
+
+        // Find Notification
+        const notification = await SELECT.one
+            .from(Notifications)
+            .where({ ID });
+
+        if (!notification) {
+            return req.error(404, "Notification Not Found");
+        }
+
+        // Already read
+        if (notification.isRead === true) {
+            return req.error(400, "Notification is already marked as read.");
+        }
+
+        // Mark as read
+        await UPDATE(Notifications)
+            .set({
+                isRead: true
+            })
+            .where({ ID });
+
+        return "Notification marked as read.";
+    });
+
+    // Mark All Notifications as Read
+    this.on("markAllNotificationsRead", async (req) => {
+
+        const { employeeID } = req.data;
+
+        // Check Employee
+        const employee = await SELECT.one
+            .from(Employees)
+            .where({ ID: employeeID });
+
+        if (!employee) {
+            return req.error(404, "Employee Not Found");
+        }
+
+        // Find unread notifications
+        const unreadNotifications = await SELECT
+            .from(Notifications)
+            .where({
+                recipient_ID: employeeID,
+                isRead: false
+            });
+
+        // No unread notifications
+        if (unreadNotifications.length === 0) {
+            return "All notifications are already marked as read.";
+        }
+
+        // Mark all as read
+        await UPDATE(Notifications)
+            .set({
+                isRead: true
+            })
+            .where({
+                recipient_ID: employeeID,
+                isRead: false
+            });
+
+        return `${unreadNotifications.length} notification(s) marked as read.`;
+
+    });
+    // Get Unread Notification Count
+    this.on("unreadNotificationCount", async (req) => {
+
+        const { employeeID } = req.data;
+
+        // Check Employee
+        const employee = await SELECT.one
+            .from(Employees)
+            .where({ ID: employeeID });
+
+        if (!employee) {
+            return req.error(404, "Employee Not Found");
+        }
+
+        // Count unread notifications
+        const notifications = await SELECT
+            .from(Notifications)
+            .where({
+                recipient_ID: employeeID,
+                isRead: false
+            });
+
+        return notifications.length;
+
+    });
+
+    // Filter Notifications
+    this.on("filterNotifications", async (req) => {
+
+        const { employeeID, type, isRead } = req.data;
+
+        // Check Employee
+        const employee = await SELECT.one
+            .from(Employees)
+            .where({ ID: employeeID });
+
+        if (!employee) {
+            return req.error(404, "Employee Not Found");
+        }
+
+        // Start query
+        let query = SELECT
+            .from(Notifications)
+            .where({
+                recipient_ID: employeeID
+            });
+
+        // Filter by notification type
+        if (type) {
+            query = query.where({
+                recipient_ID: employeeID,
+                type: type
+            });
+        }
+
+        // Filter by read/unread
+        if (isRead !== null && isRead !== undefined) {
+            query = query.where({
+                recipient_ID: employeeID,
+                isRead: isRead
+            });
+        }
+
+        // Execute query
+        const notifications = await query;
+
+        // Sort newest first
+        notifications.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+
+        return notifications;
 
     });
 });

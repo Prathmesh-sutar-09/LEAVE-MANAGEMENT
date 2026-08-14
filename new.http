@@ -2,7 +2,7 @@ POST http://localhost:4004/odata/v4/leave/Departments
 Content-Type: application/json
 
 {
-    "name": "IT"
+    "name": "SAP CAPM"
 }
 
 ###
@@ -16,11 +16,11 @@ POST http://localhost:4004/odata/v4/leave/Employees
 Content-Type: application/json
 
 {
-    "employeeId": "EMP100",
-    "name": "Alice",
+    "employeeId": "EMP101",
+    "name": "Prathmesh",
     "designation": "Project Manager",
     "joiningDate": "2025-01-01",
-    "department_ID": "57a52b7c-44a7-4520-a7c3-cb3ee50722ba"
+    "department_ID": "a88a09e0-eb97-42b2-8815-0a5e2328c543"
 }
 
 ###
@@ -32,8 +32,8 @@ Content-Type: application/json
     "name": "Ramesh",
     "designation": "Software Engineer",
     "joiningDate": "2026-01-01",
-    "department_ID": "57a52b7c-44a7-4520-a7c3-cb3ee50722ba",
-    "manager_ID": "9996e2d6-a406-429f-a9b6-7043ff6006ca"
+    "department_ID": "a88a09e0-eb97-42b2-8815-0a5e2328c543",
+    "manager_ID": "32190e52-b7e1-4c6d-bfd0-fd9e9fca3f74"
 }
 
 ###

@@ -8,6 +8,7 @@ service LeaveService {
     entity Departments as projection on db.Departments;
     entity Holidays as projection on db.Holidays;
     entity Notifications as projection on db.Notifications;
+    entity AuditLogs as projection on db.AuditLogs;
     action managerApprove(ID : UUID) returns String;
     action managerReject(ID : UUID) returns String;
     action hrApprove(ID : UUID) returns String;
@@ -23,8 +24,19 @@ service LeaveService {
     action leaveBalanceReport() returns String;
     action pendingApprovalReport() returns String;
     action dashboardKPIs() returns String;
+    action markNotificationRead(ID : UUID) returns String;
+    action markAllNotificationsRead(employeeID : UUID) returns String;
     function remainingLeave(employeeID : UUID, leaveType :UUID) returns Integer;
     function leaveHistory(employeeID : UUID) returns many LeaveRequests;
     function totalEmployees() returns Integer;
     function employeesByManager(managerID : UUID) returns many Employees;
+    function auditHistory() returns many AuditLogs;
+    function employeeNotifications(employeeID : UUID) returns many Notifications;
+    function unreadNotifications(employeeID : UUID) returns many Notifications;
+    function unreadNotificationCount(employeeID : UUID) returns Integer;
+    function filterNotifications(
+    employeeID : UUID,
+    type       : String,
+    isRead     : Boolean
+    ) returns many Notifications;
 }
