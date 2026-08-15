@@ -7,6 +7,7 @@ entity Employees {
         designation : String(50);
         joiningDate : Date;
         status : String(20);
+        role         : String(20) default 'Employee';
         manager : Association to Employees;
         department    :  Association to Departments;
         leaveBalances : Composition of many LeaveBalances on leaveBalances.employee = $self;

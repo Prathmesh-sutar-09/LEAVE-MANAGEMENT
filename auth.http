@@ -1,0 +1,66 @@
+GET http://localhost:4004/odata/v4/leave/Employees
+
+
+###
+PATCH http://localhost:4004/odata/v4/leave/Employees(931116ca-7a40-417e-a9b7-2345e8046e2a)
+Content-Type: application/json
+
+{
+    "role": "Manager"
+}
+
+###
+PATCH http://localhost:4004/odata/v4/leave/Employees(e480ee38-34a0-43c4-afcd-53d25fdca343)
+Content-Type: application/json
+
+{
+    "employeeId": "EMP102"
+}
+
+###
+### Current User - Prathmesh
+GET http://localhost:4004/odata/v4/leave/currentUser
+Authorization: Basic cHJhdGhtZXNoOm1hbmFnZXIxMjM=
+
+### Create HR Employee
+POST http://localhost:4004/odata/v4/leave/Employees
+Content-Type: application/json
+
+{
+    "employeeId": "EMP103",
+    "name": "HR Admin",
+    "designation": "HR Manager",
+    "joiningDate": "2025-01-01",
+    "status": "Active",
+    "role": "HR",
+    "department_ID": "85a00930-5bfe-435f-9211-eeff8e09d152"
+}
+
+###
+POST http://localhost:4004/odata/v4/leave/managerApprove
+Authorization: Basic cHJhdGhtZXNoOm1hbmFnZXIxMjM=
+Content-Type: application/json
+
+{
+    "ID": "2ac69ac6-fae8-4503-b91d-c5d277462b94"
+}
+
+###
+POST http://localhost:4004/odata/v4/leave/hrReject
+Authorization: Basic aHI6aHIxMjM=
+Content-Type: application/json
+
+{
+    "ID": "2ac69ac6-fae8-4503-b91d-c5d277462b94"
+}
+
+###
+POST http://localhost:4004/odata/v4/leave/dashboardKPIs
+Authorization: Basic caHI6aHIxMjM=
+
+###
+GET http://localhost:4004/odata/v4/leave/myEmployee
+Authorization: Basic cHJhdGhtZXNoOm1hbmFnZXIxMjM=
+
+###
+GET http://localhost:4004/odata/v4/leave/AuditLogs

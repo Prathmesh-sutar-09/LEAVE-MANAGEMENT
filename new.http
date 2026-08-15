@@ -20,7 +20,7 @@ Content-Type: application/json
     "name": "Prathmesh",
     "designation": "Project Manager",
     "joiningDate": "2025-01-01",
-    "department_ID": "a88a09e0-eb97-42b2-8815-0a5e2328c543"
+    "department_ID": "85a00930-5bfe-435f-9211-eeff8e09d152"
 }
 
 ###
@@ -28,12 +28,12 @@ POST http://localhost:4004/odata/v4/leave/Employees
 Content-Type: application/json
 
 {
-    "employeeId": "EMP101",
-    "name": "Ramesh",
+    "employeeId": "EMP104",
+    "name": "Yash",
     "designation": "Software Engineer",
     "joiningDate": "2026-01-01",
-    "department_ID": "a88a09e0-eb97-42b2-8815-0a5e2328c543",
-    "manager_ID": "32190e52-b7e1-4c6d-bfd0-fd9e9fca3f74"
+    "department_ID": "931116ca-7a40-417e-a9b7-2345e8046e2a",
+    "manager_ID": "931116ca-7a40-417e-a9b7-2345e8046e2a"
 }
 
 ###

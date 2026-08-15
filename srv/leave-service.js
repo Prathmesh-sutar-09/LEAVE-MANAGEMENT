@@ -2,7 +2,11 @@ const cds = require('@sap/cds');
 const { message } = require('@sap/cds/lib/log/cds-error');
 const { SELECT, UPDATE, INSERT } = require('@sap/cds/lib/ql/cds-ql');
 
-
+const mockUserEmployeeMap = {
+    prathmesh: "EMP101",
+    ramesh: "EMP102",
+    hr: "EMP103"
+};
 module.exports = cds.service.impl(async function () {
 
     const {
@@ -15,6 +19,29 @@ module.exports = cds.service.impl(async function () {
         Notifications,
         AuditLogs
     } = this.entities;
+
+    async function getCurrentEmployee(req) {
+
+        const userId = req.user.id;
+
+        if (!userId || userId === "anonymous") {
+            return null;
+        }
+
+        const employeeId = mockUserEmployeeMap[userId];
+
+        if (!employeeId) {
+            return null;
+        }
+
+        const employee = await SELECT.one
+            .from(Employees)
+            .where({
+                employeeId: employeeId
+            });
+
+        return employee;
+    }
 
 
     // Helper Function
@@ -354,6 +381,15 @@ module.exports = cds.service.impl(async function () {
 
         const { ID } = req.data;
 
+        const currentEmployee = await getCurrentEmployee(req);
+
+        if (!currentEmployee) {
+            return req.error(
+                403,
+                "Authenticated user is not linked to an employee."
+            );
+        }
+
         // Find Leave Request
         const leave = await SELECT.one
             .from(LeaveRequests)
@@ -378,7 +414,7 @@ module.exports = cds.service.impl(async function () {
         // Audit Log
         await INSERT.into(AuditLogs).entries({
             action: "MANAGER_APPROVED",
-            performedBy_ID: null,
+            performedBy_ID: currentEmployee.ID,
             leaveRequest_ID: leave.ID,
             oldStatus: "Pending Manager Approval",
             newStatus: "Pending HR Approval",
@@ -410,6 +446,15 @@ module.exports = cds.service.impl(async function () {
 
         const { ID } = req.data;
 
+        // Get authenticated employee
+        const currentEmployee = await getCurrentEmployee(req);
+
+        if (!currentEmployee) {
+            return req.error(
+                403,
+                "Authenticated user is not linked to an employee."
+            );
+        }
         // Find Leave Request
         const leave = await SELECT.one
             .from(LeaveRequests)
@@ -465,7 +510,7 @@ module.exports = cds.service.impl(async function () {
         // Audit Log
         await INSERT.into(AuditLogs).entries({
             action: "HR_APPROVED",
-            performedBy_ID: null,
+            performedBy_ID: currentEmployee.ID,
             leaveRequest_ID: leave.ID,
             oldStatus: "Pending HR Approval",
             newStatus: "Approved",
@@ -497,6 +542,15 @@ module.exports = cds.service.impl(async function () {
 
         const { ID } = req.data;
 
+        const currentEmployee = await getCurrentEmployee(req);
+
+        if (!currentEmployee) {
+            return req.error(
+                403,
+                "Authenticated user is not linked to an employee."
+            );
+        }
+
         // Find Leave Request
         const leave = await SELECT.one
             .from(LeaveRequests)
@@ -521,7 +575,7 @@ module.exports = cds.service.impl(async function () {
         // Audit Log
         await INSERT.into(AuditLogs).entries({
             action: "MANAGER_REJECTED",
-            performedBy_ID: null,
+            performedBy_ID: currentEmployee.ID,
             leaveRequest_ID: leave.ID,
             oldStatus: "Pending Manager Approval",
             newStatus: "Rejected",
@@ -547,6 +601,15 @@ module.exports = cds.service.impl(async function () {
 
         const { ID } = req.data;
 
+        const currentEmployee = await getCurrentEmployee(req);
+
+        if (!currentEmployee) {
+            return req.error(
+                403,
+                "Authenticated user is not linked to an employee."
+            );
+        }
+
         // Find Leave Request
         const leave = await SELECT.one
             .from(LeaveRequests)
@@ -571,7 +634,7 @@ module.exports = cds.service.impl(async function () {
         // Audit Log
         await INSERT.into(AuditLogs).entries({
             action: "HR_REJECTED",
-            performedBy_ID: null,
+            performedBy_ID: currentEmployee.ID,
             leaveRequest_ID: leave.ID,
             oldStatus: "Pending HR Approval",
             newStatus: "Rejected",
@@ -1442,5 +1505,35 @@ module.exports = cds.service.impl(async function () {
 
         return notifications;
 
+    });
+
+    // Test Current Authenticated User
+    this.on("currentUser", async (req) => {
+
+        return JSON.stringify({
+            id: req.user.id,
+            roles: req.user.roles
+        });
+
+    });
+
+    // Test Current Employee
+    this.on("myEmployee", async (req) => {
+
+        const employee = await getCurrentEmployee(req);
+
+        if (!employee) {
+            return req.error(
+                404,
+                "Authenticated user is not linked to an employee."
+            );
+        }
+
+        return JSON.stringify({
+            ID: employee.ID,
+            employeeId: employee.employeeId,
+            name: employee.name,
+            role: employee.role
+        });
     });
 });

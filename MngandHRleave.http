@@ -2,10 +2,10 @@ POST http://localhost:4004/odata/v4/leave/LeaveRequests
 Content-Type: application/json
 
 {
-    "employee_ID":"816440ef-08a4-438e-a3c3-3f55a04a93cd",
+    "employee_ID":"931116ca-7a40-417e-a9b7-2345e8046e2a",
     "leaveType_ID":"11111111-1111-1111-1111-111111111111",
-    "fromDate":"2026-09-25",
-    "toDate":"2026-09-27",
+    "fromDate":"2026-09-21",
+    "toDate":"2026-09-22",
     "reason":"Vacation"
 }
 
@@ -125,7 +125,7 @@ POST http://localhost:4004/odata/v4/leave/managerApprove
 Content-Type: application/json
 
 {
-    "ID": "401738e5-854c-466e-8daf-cda2593c71fc"
+    "ID": "017575f3-b4a3-4703-b3fa-8a0aa0e25e90"
 }
 
 

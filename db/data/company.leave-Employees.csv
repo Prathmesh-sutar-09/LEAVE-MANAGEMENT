@@ -1,1 +1,1 @@
-ID,employeeId,name,department,leaveBalance
+ID,employeeId,name,designation,joiningDate,status,role,manager_ID,department_ID

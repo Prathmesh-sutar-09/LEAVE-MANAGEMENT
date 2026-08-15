@@ -9,20 +9,30 @@ service LeaveService {
     entity Holidays as projection on db.Holidays;
     entity Notifications as projection on db.Notifications;
     entity AuditLogs as projection on db.AuditLogs;
+    @requires: 'Manager'
     action managerApprove(ID : UUID) returns String;
+    @requires: 'Manager'
     action managerReject(ID : UUID) returns String;
+    @requires: 'HR'
     action hrApprove(ID : UUID) returns String;
+    @requires: 'HR'
     action hrReject(ID : UUID) returns String;
     action withdrawLeave(ID : UUID) returns String;
     action cancelLeave(ID : UUID) returns String;
     action deactivateHoliday(ID : UUID) returns String;
     action activateHoliday(ID : UUID) returns String;
     action leaveSummary() returns String;
+    @requires: 'HR'
     action departmentLeaveReport() returns String;
+    @requires: 'HR'
     action leaveTypeUsageReport() returns String;
+    @requires: 'HR'
     action monthlyLeaveReport() returns String;
+    @requires: 'HR'
     action leaveBalanceReport() returns String;
+    @requires: 'HR'
     action pendingApprovalReport() returns String;
+    @requires: 'HR'
     action dashboardKPIs() returns String;
     action markNotificationRead(ID : UUID) returns String;
     action markAllNotificationsRead(employeeID : UUID) returns String;
@@ -39,4 +49,6 @@ service LeaveService {
     type       : String,
     isRead     : Boolean
     ) returns many Notifications;
+    function currentUser() returns String;
+    function myEmployee() returns String;
 }

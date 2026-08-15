@@ -14,7 +14,24 @@
     "requires": {
       "db": {
         "kind": "sqlite"
-      }
+      },
+      "auth": {
+  "strategy": "mock",
+  "users": {
+    "prathmesh": {
+      "password": "manager123",
+      "roles": ["Manager"]
+    },
+    "ramesh": {
+      "password": "employee123",
+      "roles": ["Employee"]
+    },
+    "hr": {
+      "password": "hr123",
+      "roles": ["HR"]
+    }
+  }
+}
     }
   },
   "private": true
