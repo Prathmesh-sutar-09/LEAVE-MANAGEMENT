@@ -1,0 +1,60 @@
+GET http://localhost:4004/odata/v4/leave/LeaveRequests
+Authorization: Basic cmFtZXNoOmVtcGxveWVlMTIz
+
+###
+GET http://localhost:4004/odata/v4/leave/LeaveRequests
+Authorization: Basic aHI6aHIxMjM=
+
+### Create Leave Request for Ramesh
+POST http://localhost:4004/odata/v4/leave/LeaveRequests
+Authorization: Basic cmFtZXNoOmVtcGxveWVlMTIz
+Content-Type: application/json
+
+{
+    "employee_ID": "e480ee38-34a0-43c4-afcd-53d25fdca343",
+    "leaveType_ID": "11111111-1111-1111-1111-111111111111",
+    "fromDate": "2026-10-05",
+    "toDate": "2026-10-06",
+    "reason": "Personal work",
+    "status": ""
+}
+
+###
+GET http://localhost:4004/odata/v4/leave/LeaveBalances
+Authorization: Basic cmFtZXNoOmVtcGxveWVlMTIz
+
+###
+GET http://localhost:4004/odata/v4/leave/Notifications
+Authorization: Basic cmFtZXNoOmVtcGxveWVlMTIz
+
+###
+GET http://localhost:4004/odata/v4/leave/Notifications
+Authorization: Basic aHI6aHIxMjM=
+
+###
+GET http://localhost:4004/odata/v4/leave/leaveHistory(employeeID=e480ee38-34a0-43c4-afcd-53d25fdca343)
+Authorization: Basic cmFtZXNoOmVtcGxveWVlMTIz
+
+###
+GET http://localhost:4004/odata/v4/leave/leaveHistory(employeeID=931116ca-7a40-417e-a9b7-2345e8046e2a)
+Authorization: Basic cmFtZXNoOmVtcGxveWVlMTIz
+
+###
+GET http://localhost:4004/odata/v4/leave/LeaveRequests
+Authorization: Basic cHJhdGhtZXNoOm1hbmFnZXIxMjM=
+
+###
+GET http://localhost:4004/odata/v4/leave/LeaveBalances
+Authorization: Basic cHJhdGhtZXNoOm1hbmFnZXIxMjM=
+
+###
+GET http://localhost:4004/odata/v4/leave/Employees
+Authorization: Basic aHI6aHIxMjM=
+
+###
+GET http://localhost:4004/odata/v4/leave/LeaveRequests
+Authorization: Basic aHI6aHIxMjM=
+
+###
+GET http://localhost:4004/odata/v4/leave/LeaveBalances
+Authorization: Basic aHI6aHIxMjM=

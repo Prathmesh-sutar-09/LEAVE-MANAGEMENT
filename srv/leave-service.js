@@ -859,15 +859,58 @@ module.exports = cds.service.impl(async function () {
 
     });
 
-    // Leave History
     this.on("leaveHistory", async (req) => {
 
         const { employeeID } = req.data;
 
-        return await SELECT
-            .from(LeaveRequests)
-            .where({ employee_ID: employeeID });
+        // HR can view any employee's history
+        if (req.user.is("HR")) {
 
+            return await SELECT
+                .from(LeaveRequests)
+                .where({
+                    employee_ID: employeeID
+                });
+        }
+
+        // Get currently authenticated employee
+        const currentEmployee = await getCurrentEmployee(req);
+
+        if (!currentEmployee) {
+            return req.error(
+                403,
+                "Authenticated user is not linked to an employee."
+            );
+        }
+
+        // Employee can view only their own history
+        if (req.user.is("Employee")) {
+
+            if (employeeID !== currentEmployee.ID) {
+                return req.error(
+                    403,
+                    "You can only view your own leave history."
+                );
+            }
+
+            return await SELECT
+                .from(LeaveRequests)
+                .where({
+                    employee_ID: currentEmployee.ID
+                });
+        }
+
+        // Manager handling will be implemented later
+        if (req.user.is("Manager")) {
+
+            return await SELECT
+                .from(LeaveRequests)
+                .where({
+                    employee_ID: employeeID
+                });
+        }
+
+        return req.error(403, "Forbidden");
     });
 
 
@@ -1534,6 +1577,149 @@ module.exports = cds.service.impl(async function () {
             employeeId: employee.employeeId,
             name: employee.name,
             role: employee.role
+        });
+    });
+
+    this.before("READ", "LeaveRequests", async (req) => {
+
+        // HR can see all leave requests
+        if (req.user.is("HR")) {
+            return;
+        }
+
+        // Manager can see own + team leave requests
+        if (req.user.is("Manager")) {
+
+            const manager = await getCurrentEmployee(req);
+
+            if (!manager) {
+                return req.error(
+                    403,
+                    "Authenticated manager is not linked to an employee."
+                );
+            }
+
+            // Find employees reporting to this manager
+            const teamMembers = await SELECT
+                .from(Employees)
+                .columns("ID")
+                .where({
+                    manager_ID: manager.ID
+                });
+
+            const teamEmployeeIds = teamMembers.map(
+                employee => employee.ID
+            );
+
+            // Include manager's own leaves
+            teamEmployeeIds.push(manager.ID);
+
+            req.query.where({
+                employee_ID: {
+                    in: teamEmployeeIds
+                }
+            });
+
+            return;
+        }
+
+        // Employee
+        const employee = await getCurrentEmployee(req);
+
+        if (!employee) {
+            return req.error(
+                403,
+                "Authenticated user is not linked to an employee."
+            );
+        }
+
+        // Employee can see only their own leave requests
+        req.query.where({
+            employee_ID: employee.ID
+        });
+    });
+    this.before("READ", "LeaveBalances", async (req) => {
+
+        // HR can see all balances
+        if (req.user.is("HR")) {
+            return;
+        }
+
+        if (req.user.is("Manager")) {
+
+            const manager = await getCurrentEmployee(req);
+
+            if (!manager) {
+                return req.error(
+                    403,
+                    "Authenticated manager is not linked to an employee."
+                );
+            }
+
+            const teamMembers = await SELECT
+                .from(Employees)
+                .columns("ID")
+                .where({
+                    manager_ID: manager.ID
+                });
+
+            const teamEmployeeIds = teamMembers.map(
+                employee => employee.ID
+            );
+
+            // Include manager's own balance
+            teamEmployeeIds.push(manager.ID);
+
+            req.query.where({
+                employee_ID: {
+                    in: teamEmployeeIds
+                }
+            });
+
+            return;
+        }
+
+        // Employee
+        const employee = await getCurrentEmployee(req);
+
+        if (!employee) {
+            return req.error(
+                403,
+                "Authenticated user is not linked to an employee."
+            );
+        }
+
+        // Employee can see only their own balance
+        req.query.where({
+            employee_ID: employee.ID
+        });
+    });
+
+    this.before("READ", "Notifications", async (req) => {
+
+        // HR can see all notifications
+        if (req.user.is("HR")) {
+            return;
+        }
+
+        // Manager access will be restricted later
+        if (req.user.is("Manager")) {
+            return;
+        }
+
+        // Employee
+        const employee = await getCurrentEmployee(req);
+
+        if (!employee) {
+            return req.error(
+                403,
+                "Authenticated user is not linked to an employee."
+            );
+        }
+
+        // Employee can see only their own notifications
+        req.query.where({
+            recipient_ID: employee.ID
         });
     });
 });

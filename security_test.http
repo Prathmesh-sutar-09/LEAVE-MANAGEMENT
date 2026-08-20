@@ -1,0 +1,20 @@
+GET http://localhost:4004/odata/v4/leave/LeaveRequests
+Authorization: Basic cmFtZXNoOmVtcGxveWVlMTIz
+
+###
+POST http://localhost:4004/odata/v4/leave/managerApprove
+Authorization: Basic cmFtZXNoOmVtcGxveWVlMTIz
+Content-Type: application/json
+
+{
+    "ID": "1635b54c-18a5-4675-b2bd-5ab6c1e0fb00"
+}
+
+###
+POST http://localhost:4004/odata/v4/leave/hrApprove
+Authorization: Basic cHJhdGhtZXNoOm1hbmFnZXIxMjM=
+Content-Type: application/json
+
+{
+    "ID": "1635b54c-18a5-4675-b2bd-5ab6c1e0fb00"
+}
